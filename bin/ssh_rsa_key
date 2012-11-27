@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# generates a RSA key with my personal email account
+
+echo "***Generating a new RSA key for deepakkumarnd@gmail.com"
+echo "***Make sure you did a backup of .ssh folder"
+echo ""
+
+ssh-keygen -t rsa -C 'deepakkumarnd@gmail.com'
