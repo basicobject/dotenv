@@ -8,5 +8,6 @@ echo "Loading profile"
 export PATH=$PATH:$BASE/bin
 
 source $BASE/git
+source $BASE/shortcuts
 
 
