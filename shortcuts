@@ -1,1 +1,2 @@
 alias v='vim -N'
+alias e='emacs -nw'
