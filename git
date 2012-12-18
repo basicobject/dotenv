@@ -1,4 +1,6 @@
+
 alias ga='git add'
+alias gr='git rm'
 alias gp='git push'
 alias gl='git log'
 alias gs='git status'
