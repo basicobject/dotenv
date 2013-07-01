@@ -1,2 +1,7 @@
-alias v='vim -N'
-alias e='emacs -nw'
+emacs --version > /dev/null
+
+if [ $? -eq 0 ] ; then
+  alias .e='emacs -nw'
+else
+  alias .e='nano'
+fi
