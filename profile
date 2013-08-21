@@ -10,11 +10,9 @@ export PATH=$PATH:$BASE/bin
 source $BASE/git
 source $BASE/shortcuts
 
-function git_branch_name(){
-    git_head=$(git symbolic-ref HEAD 2>/dev/null) || return
-    echo "["${git_head#refs/heads/}"]"
+function parse_git_branch {
+   git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
 }
 
-export PS1="\u@\W \$(git_branch_name)\$ \n ->"
-
+export PS1="\[\e[33;0m\]\u@\h [\W]\$(parse_git_branch)\n$ \[\e[0m\]"
 
