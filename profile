@@ -16,3 +16,5 @@ function parse_git_branch {
 
 export PS1="\[\e[33;0m\]\u@\h [\W]\$(parse_git_branch)\n$ \[\e[0m\]"
 
+export GOPATH=$HOME/golib
+export PATH=$PATH:$GOPATH/bin
