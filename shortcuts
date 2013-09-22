@@ -5,3 +5,5 @@ if [ $? -eq 0 ] ; then
 else
   alias .e='nano'
 fi
+
+alias lime='~/Applications/Sublime/sublime_text &'
