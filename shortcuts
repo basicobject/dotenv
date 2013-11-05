@@ -6,4 +6,6 @@ else
   alias .e='nano'
 fi
 
-alias lime='~/Applications/Sublime/sublime_text &'
+lime() {
+       ~/Applications/Sublime/sublime_text $1 &
+}
