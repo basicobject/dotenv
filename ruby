@@ -1,3 +1,4 @@
-alias bes='bundle exec rails s puma'
-alias bec='bundle exec rails c'
-alias beg='bundle exec guard'
+alias bx='bundle exec'
+alias bxs='bundle exec rails s'
+alias bxc='bundle exec rails c'
+alias bxg='bundle exec guard'
