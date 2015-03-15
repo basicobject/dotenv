@@ -6,6 +6,14 @@ else
   alias .e='nano'
 fi
 
-lime() {
-       ~/Applications/Sublime/sublime_text $1 &
+compress() {
+  tar cvfz $1.tar.gz $1
+}
+
+studio() {
+  exec ~/Applications/android-studio/bin/studio.sh &
+}
+
+genymotion() {
+  exec ~/Applications/genymotion/genymotion &
 }
