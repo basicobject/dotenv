@@ -1,8 +1,10 @@
 #!/usr/bin/env ruby
 
+# can be used to rename files in bulk
 # works only in the current directory
 # copy files to be renamed to a directory and cd to that directory
-# specify the pattern of filename and prefix
+# Usage:
+#    ./bulk_rename.rb aa *.png
 # run this file
 
 if ARGV.size < 2
