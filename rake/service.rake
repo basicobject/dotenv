@@ -9,3 +9,11 @@ namespace :mongodb do
     sh command
   end
 end
+
+namespace :redis do
+  desc 'start redis-server'
+  task :start do
+    puts 'Starting redis server'
+    command = 'redis-server ~/.env/conf/redis.conf'
+  end
+end
