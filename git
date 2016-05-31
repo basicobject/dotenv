@@ -22,5 +22,6 @@ alias gdc='git diff --cached'
 alias gm='git commit -m'
 alias gb='git branch'
 alias gco='git checkout'
+alias gui='git gui'
 
-export GIT_EDITOR='emacs -nw'
+export GIT_EDITOR='vim'
