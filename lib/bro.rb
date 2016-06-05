@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'thor'
-require 'terminal-table'
 require 'yaml'
 require 'pry'
 
@@ -38,10 +37,19 @@ class Bro < Thor
         print_error ex.message
       end
     end
+
+    def histogram(label, n, max=100)
+      max = max < 100 ? 100 : max
+      count = (n/max.to_f)*100
+      count = 1 if count < 1
+      str = "*" * count
+      [label, n, "#{str} #{n}"].join("\t")
+    end
   end
 
   desc "list servers", "bro servers"
   def servers
+    require 'terminal-table'
     rows = Bro.config['servers'].to_a
     table = Terminal::Table.new(:title => "Server List", :headings => ['Name', 'IP'], :rows => rows)
     table.align_column(1, :right)
@@ -89,6 +97,38 @@ class Bro < Thor
   def scan(hostname, range=0)
     command = "nmap -n -sP #{hostname}/#{range}"
     system(command)
+  end
+
+  desc "view commit histogram", "bro commits"
+  def commits
+    command = 'git log --date=short | grep Date: | cut -d " " -f4 | uniq -c'
+    result = IO.popen(command).read
+    lines = result.split("\n")
+    max = lines.map { |line| line.split.first.to_i }.max
+
+    puts max
+
+    lines.each do |line|
+      label, count = line.split.reverse
+      puts histogram(label, count.to_i, max)
+    end
+  end
+
+  desc "view authors commits histogram", "bro authors commits"
+  def authors_commits
+    command = 'git log | grep Author: |  cut -d "<" -f2 | cut -d "@" -f1 | sort | uniq -c'
+    result = IO.popen(command).read
+    lines = result.split("\n")
+    max = lines.map { |line| line.split.first.to_i }.max
+
+    to_name = Proc.new do |name|
+      name.gsub(/\W/, " ").strip.split.map(&:capitalize).join(" ")
+    end
+
+    lines.each do |line|
+      label, count = line.split.reverse
+      puts histogram(to_name.call(label).ljust(30), count.to_i, max)
+    end
   end
 end
 
