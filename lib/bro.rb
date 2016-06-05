@@ -7,8 +7,6 @@ require 'pry'
 
 class Bro < Thor
 
-  attr_accessor :server_list
-
   def self.config
     @config ||= YAML.load(File.read(File.expand_path("../../config.yml", __FILE__)))
   end
