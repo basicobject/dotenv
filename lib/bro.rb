@@ -1,24 +1,26 @@
 #!/usr/bin/env ruby
 
-require 'thor'
+require 'bundler'
 require 'yaml'
-require 'pry'
 
-class Bro < Thor
+Bundler.require(:default)
 
-  def self.config
-    @config ||= YAML.load(File.read(File.expand_path("../../config.yml", __FILE__)))
+$pastel = Pastel.new
+
+module Bro
+
+  module OutputHelpers
+
+    def print_line(msg, color = :green)
+      puts $pastel.send(color.to_sym, msg)
+    end
+
+    def print_error(msg, color = :red)
+      puts $pastel.send(color.to_sym, msg)
+    end
   end
 
-  no_commands do
-
-    def print_line(msg)
-      puts "\033[0;32m #{msg} \033[0m"
-    end
-
-    def print_error(msg)
-      puts "\033[0;31m #{msg} \033[0m"
-    end
+  module CommandHelpers
 
     def run_secure_connect_command(type, server, user)
       ip = Bro.config['servers'][server]
@@ -47,89 +49,107 @@ class Bro < Thor
     end
   end
 
-  desc "list servers", "bro servers"
-  def servers
-    require 'terminal-table'
-    rows = Bro.config['servers'].to_a
-    table = Terminal::Table.new(:title => "Server List", :headings => ['Name', 'IP'], :rows => rows)
-    table.align_column(1, :right)
-    puts table
-  end
-
-  desc "ssh to servers", "bro ssh <server_name>"
-  def ssh(server, user='dev')
-    run_secure_connect_command("ssh", server, user)
-  end
-
-  desc "sftp to servers", "bro sftp <server_name>"
-  def sftp(server, user='dev')
-    run_secure_connect_command("sftp", server, user)
-  end
-
-  desc "start service", "bro start <service_name>"
-  def start(name)
-    case name
-    when 'server' then
-      command = "ruby -run -e httpd -- -p 5000 ."
-      print_line "Running #{command}"
-      system(command)
-    when 'mongodb' then
-      command = "mongod --journal --fork --logpath=/dev/null"
-      print_line "Starting mongodb server"
-      print_line "Running #{command}"
-      system(command)
-    when 'redis'
-      command = "redis-server ~/.env/conf/redis.conf"
-      print_line "Starting redis server"
-      print_line "Running #{command}"
-      system(command)
-    when 'vm', 'tm'
-      command = "VBoxManage startvm turingmachine --type headless"
-      print_line "Starting VirtualBox loading turingmachine"
-      print_line "Running #{command}"
-      system(command)
-    else
-      print_line "Teach me how to start #{name}, I will do it next time."
-    end
-  end
-
-  desc "scan port", "bro scan <hostname> range"
-  def scan(hostname, range=0)
-    command = "nmap -n -sP #{hostname}/#{range}"
-    system(command)
-  end
-
-  desc "view commit histogram", "bro commits"
-  def commits
-    command = 'git log --date=short | grep Date: | cut -d " " -f4 | uniq -c'
-    result = IO.popen(command).read
-    lines = result.split("\n")
-    max = lines.map { |line| line.split.first.to_i }.max
-
-    puts max
-
-    lines.each do |line|
-      label, count = line.split.reverse
-      puts histogram(label, count.to_i, max)
-    end
-  end
-
-  desc "view authors commits histogram", "bro authors commits"
-  def authors_commits
-    command = 'git log | grep Author: |  cut -d "<" -f2 | cut -d "@" -f1 | sort | uniq -c'
-    result = IO.popen(command).read
-    lines = result.split("\n")
-    max = lines.map { |line| line.split.first.to_i }.max
-
-    to_name = Proc.new do |name|
-      name.gsub(/\W/, " ").strip.split.map(&:capitalize).join(" ")
+  class Bro < Thor
+    def self.config
+      @config ||= YAML.load(File.read(File.expand_path("../../config.yml", __FILE__)))
     end
 
-    lines.each do |line|
-      label, count = line.split.reverse
-      puts histogram(to_name.call(label).ljust(30), count.to_i, max)
+    no_commands do
+      include OutputHelpers
+      include CommandHelpers
+    end
+
+    desc "hello", "Say hello to bro"
+    def hello
+      print_line "Hello, Bro. Good to see you today. Need some help ? Just call help.", :yellow
+      progress = ProgressBar.create
+      50.times { progress.increment; sleep 0.1 }
+    end
+
+    desc "list servers", "bro servers"
+    def servers
+      require 'terminal-table'
+      rows = Bro.config['servers'].to_a
+      table = Terminal::Table.new(:title => "Server List", :headings => ['Name', 'IP'], :rows => rows)
+      table.align_column(1, :right)
+      puts table
+    end
+
+    desc "ssh to servers", "bro ssh <server_name>"
+    def ssh(server, user='dev')
+      run_secure_connect_command("ssh", server, user)
+    end
+
+    desc "sftp to servers", "bro sftp <server_name>"
+    def sftp(server, user='dev')
+      run_secure_connect_command("sftp", server, user)
+    end
+
+    desc "start service", "bro start <service_name>"
+    def start(name)
+      case name
+      when 'server' then
+        command = "ruby -run -e httpd -- -p 5000 ."
+        print_line "Running #{command}"
+        system(command)
+      when 'mongodb' then
+        command = "mongod --journal --fork --logpath=/dev/null"
+        print_line "Starting mongodb server"
+        print_line "Running #{command}"
+        system(command)
+      when 'redis'
+        command = "redis-server ~/.env/conf/redis.conf"
+        print_line "Starting redis server"
+        print_line "Running #{command}"
+        system(command)
+      when 'vm', 'tm'
+        command = "VBoxManage startvm turingmachine --type headless"
+        print_line "Starting VirtualBox loading turingmachine"
+        print_line "Running #{command}"
+        system(command)
+      else
+        print_line "Teach me how to start #{name}, I will do it next time."
+      end
+    end
+
+    desc "scan port", "bro scan <hostname> range"
+    def scan(hostname, range=0)
+      command = "nmap -n -sP #{hostname}/#{range}"
+      system(command)
+    end
+
+    desc "view commit histogram", "bro commits"
+    def commits
+      command = 'git log --date=short | grep Date: | cut -d " " -f4 | uniq -c'
+      result = IO.popen(command).read
+      lines = result.split("\n")
+      max = lines.map { |line| line.split.first.to_i }.max
+
+      puts max
+
+      lines.each do |line|
+        label, count = line.split.reverse
+        print_line histogram(label, count.to_i, max), :cyan
+      end
+    end
+
+    desc "view authors commits histogram", "bro authors commits"
+    def authors_commits
+      command = 'git log | grep Author: |  cut -d "<" -f2 | cut -d "@" -f1 | sort | uniq -c'
+      result = IO.popen(command).read
+      lines = result.split("\n")
+      max = lines.map { |line| line.split.first.to_i }.max
+
+      to_name = Proc.new do |name|
+        name.gsub(/\W/, " ").strip.split.map(&:capitalize).join(" ")
+      end
+
+      lines.each do |line|
+        label, count = line.split.reverse
+        print_line histogram(to_name.call(label).ljust(30), count.to_i, max), :cyan
+      end
     end
   end
 end
 
-Bro.start(ARGV)
+Bro::Bro.start(ARGV)

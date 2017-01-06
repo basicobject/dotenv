@@ -17,3 +17,7 @@ studio() {
 genymotion() {
   exec ~/Applications/genymotion/genymotion &
 }
+
+psql() {
+ exec "/Applications/Postgres.app/Contents/Versions/9.4/bin/psql" -p5432
+}
