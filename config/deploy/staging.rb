@@ -51,7 +51,7 @@
 # ------------------------------------
 server "127.0.0.1",
   user: "vagrant",
-  roles: %w{turingmachine},
+  roles: %w{dhost rabbitmq redis},
   ssh_options: {
     user: "vagrant", # overrides user setting above
     keys: %w(/Users/deepak/.env/VM/.vagrant/machines/default/virtualbox/private_key),

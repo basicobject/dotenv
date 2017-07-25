@@ -1,7 +1,7 @@
 # config valid only for current version of Capistrano
 lock "3.8.2"
 
-# set :application, "turingmachine"
+# set :application, "dhost"
 # set :repo_url, "git@example.com:me/my_repo.git"
 
 # Default branch is :master
@@ -76,7 +76,7 @@ set :package_list, %w(build-essential libmagickcore-dev imagemagick libmagickwan
 
 # desc 'install rbenv and ruby'
 # task :install_rbenv_and_ruby do
-#   on roles(:turingmachine) do |host|
+#   on roles(:dhost) do |host|
 #     # execute(%q(sudo apt-get install -y ruby-build)) # install using ruby-build
 #
 #     if capture(%q([ -d /tmp/rbenv/ ] && echo "Y" || echo "N")) == 'N'
@@ -102,8 +102,11 @@ set :package_list, %w(build-essential libmagickcore-dev imagemagick libmagickwan
 # end
 
 desc 'Update system'
-task :update_system do
-  on roles(:turingmachine) do
+task :update_system do |t, args|
+
+  role = args.to_a[0]&.to_sym || :dhost
+
+  on roles(role) do
     info 'Running system update'
     execute('sudo sudo apt-get update')
   end
@@ -111,7 +114,7 @@ end
 
 desc 'Set system locale'
 task :set_locale do
-  on roles(:turingmachine) do
+  on roles(:dhost) do
     info 'Setting locale'
     execute('export LC_ALL=C')
   end
@@ -119,7 +122,7 @@ end
 
 desc 'Install packages'
 task :install_packages do
-  on roles(:turingmachine) do
+  on roles(:dhost) do
     info 'Installing packages'
     execute("sudo apt-get -y install #{fetch(:package_list).join(' ')}")
   end
@@ -128,7 +131,7 @@ end
 desc 'Create deploy user'
 task :create_deploy_user do
 
-  on roles(:turingmachine) do
+  on roles(:dhost) do
     exit_status = capture 'id -u deploy &> /dev/null; echo $?'
 
     if exit_status == '0'
@@ -144,7 +147,7 @@ end
 
 desc 'Add deploy user to /etc/sudoers'
 task :add_deploy_user_to_sudoers do
-  on roles(:turingmachine) do
+  on roles(:dhost) do
     info 'Adding user deploy to sudoers'
     execute(%q(sudo su -c 'chmod +w /etc/sudoers'))
     execute(%q(sudo su -c 'echo "deploy ALL=(ALL) ALL" >> /etc/sudoers'))
@@ -153,9 +156,42 @@ task :add_deploy_user_to_sudoers do
   end
 end
 
+
+desc 'Install rabbitmq'
+task :install_rabbitmq do
+  on roles(:rabbitmq) do
+    # info 'Installing rabbitmq'
+    # execute(%q(echo 'deb http://www.rabbitmq.com/debian/ testing main' | sudo tee /etc/apt/sources.list.d/rabbitmq.list))
+    # execute(%q(wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | sudo apt-key add -))
+    # invoke('update_system', 'rabbitmq')
+    # execute('sudo apt-get install -y rabbitmq-server')
+    upload! 'config/rabbitmq.config', '/tmp/rabbitmq.config'
+    sudo('cp /tmp/rabbitmq.config /etc/rabbitmq/rabbitmq.config')
+    sudo('service rabbitmq-server restart')
+  end
+end
+
+desc 'Install redis'
+task :install_redis do
+  on roles(:redis) do
+    info 'Installing redis'
+    sudo('apt-get install -y tcl8.5')
+    execute('wget http://download.redis.io/releases/redis-stable.tar.gz &> /dev/null')
+    execute('tar xzf redis-stable.tar.gz > /dev/null')
+    execute('cd ~/redis-stable; make > /dev/null')
+
+    within '~/redis-stable' do
+      sudo('make install')
+    end
+
+    info 'Redis installation is complete please run sudo  ~/redis-stable/utils/install_server.sh to interactively configure the redis system'
+
+  end
+end
+
 desc 'Setup server'
 task :setup_server do
-  on roles(:turingmachine) do | host |
+  on roles(:dhost) do | host |
     info "Runing update on Host #{host} (#{host.roles.to_a.join(', ')}):\t#{capture(:uptime)}"
     invoke('update_system')
     invoke('set_locale')
@@ -163,7 +199,6 @@ task :setup_server do
     invoke('create_deploy_user')
   end
 end
-
 
 desc 'Deployment'
 task :deploy do
