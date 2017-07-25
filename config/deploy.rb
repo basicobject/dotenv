@@ -185,6 +185,7 @@ task :install_redis do
     end
 
     info 'Redis installation is complete please run sudo  ~/redis-stable/utils/install_server.sh to interactively configure the redis system'
+    info 'Start/Stop: sudo service redis_6379 start|stop'
 
   end
 end
