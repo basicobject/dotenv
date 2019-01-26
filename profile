@@ -18,4 +18,4 @@ export GOPATH=$HOME/Work/go
 export PATH=$PATH:$GOPATH/bin
 
 alias cdc='cd ~/Work/Chillr/chillr-api'
-alias cdt='cd ~/Work/TC'
+alias cdt='cd ~/Work/tc_pay'
