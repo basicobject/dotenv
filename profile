@@ -1,20 +1,15 @@
 #!/bin/bash
 # initializer for my profile
 
-BASE=$HOME/.env
+DOTENV_BASE_PATH=$HOME/dotenv
 
 echo "Loading profile"
 
-export PATH=$PATH:$BASE/bin
+export PATH=$PATH:$DOTENV_BASE_PATH/bin
 
-#source $BASE/git
-source $BASE/shortcuts
-source $BASE/ruby
-source $BASE/net
+source $DOTENV_BASE_PATH/git
+source $DOTENV_BASE_PATH/shortcuts
+source $DOTENV_BASE_PATH/ruby
+source $DOTENV_BASE_PATH/net
 
-# export PS1="[\W]\$(parse_git_branch)\nλ \[\e[0m\]"
-# export PS1="[\033[1;30m\W\033[0m]\$(parse_git_branch) [\033[1;30m\@\033[0m] \n\033[1;31mλ \033[0m\[\e[0m\]"
-# export GOPATH=$HOME/Work/go
-# export PATH=$PATH:$GOPATH/bin
-
-alias cdt='cd ~/Work/tc_pay'
+export PS1="$(pwd | grep -o '[^/]*$')$(current_branch_with_color) $ "

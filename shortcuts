@@ -1,17 +1,3 @@
-alias cde='cd $HOME/.env'
-
 compress() {
   tar cvfz $1.tar.gz $1
-}
-
-studio() {
-  exec ~/Applications/android-studio/bin/studio.sh &
-}
-
-genymotion() {
-  exec ~/Applications/genymotion/genymotion &
-}
-
-psql() {
- exec "/Applications/Postgres.app/Contents/Versions/9.4/bin/psql" -p5432
 }
